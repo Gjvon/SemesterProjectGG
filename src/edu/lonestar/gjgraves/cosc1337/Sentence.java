@@ -1,5 +1,7 @@
 package edu.lonestar.gjgraves.cosc1337;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8,31 +10,25 @@ import java.util.regex.Pattern;
  */
 public class Sentence extends DocObject {
 
-    private Pattern SENTENCE_ENDER = Pattern.compile("[\\.\\?!]\"?+\\s+|[\\.\\?!]\"?+$");
-
-    Sentence(Object anObject) {
-
+    Sentence(Object src) {
+        super(src instanceof String ? src : null);
+        /**
+         * initialize delimiter value within the constructor
+         */
+        this.objectDelimiter = " ";
     }
 
+    /**
+     * @return true is source is not a null value
+     * if a source does not exists, nothing happens here and false will be returned.
+     */
     @Override
     public boolean parse() {
+
         if (source != null) {
-            String[] lines = (String[]) source;
-            StringBuilder currentSentence = new StringBuilder();
-            for (String l : lines) {
-                Matcher m = SENTENCE_ENDER.matcher(l);
-                int lastFind = 0;
-                while (m.find()) {
-                    currentSentence.append(l.substring(lastFind, m.start() + 1));
-                    Sentence sentence = new Sentence(currentSentence.toString());
-                    objects.add(sentence);
-                    currentSentence = new StringBuilder();
-                    lastFind = m.end();
-                }
-                if (currentSentence.length() == 0 || (currentSentence.length() > 0 && lastFind == 0)) {
-                    currentSentence.append(l.substring(lastFind) + " ");
-                }
-            }
+            String text = ((String) source).trim().replaceAll("\\s+", " ");
+            String[] words = text.split(" ");
+            objects = new ArrayList<Object>(Arrays.asList(words));
             return true;
         } else
             return false;

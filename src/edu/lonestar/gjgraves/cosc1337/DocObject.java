@@ -3,24 +3,22 @@ package edu.lonestar.gjgraves.cosc1337;
 import java.util.ArrayList;
 
 /**
- * Created by Gjvon on 5/4/2016.
+ * Created by ${Gjvon} on 5/4/2016.
  */
 public abstract class DocObject {
 
-    protected Object source;
-    protected ArrayList<Object> objects;
-    protected String objectDelimiter;
-    protected boolean parsed;
+    Object source;
+    ArrayList<Object> objects;
+    String objectDelimiter;
+    boolean parsed;
 
-    public DocObject(Object source) {
+    DocObject(Object source) {
 
         this.source = source;
         this.objects = new ArrayList<Object>();
         this.parsed = false;
     }
 
-    public DocObject() {
-    }
 
     public abstract boolean parse();
 
@@ -35,7 +33,6 @@ public abstract class DocObject {
             if (i < (objectCt - 1))
                 result.append(this.objectDelimiter);
         }
-        String out = result.toString().replaceAll(" $", "");
-        return out;
+        return result.toString().replaceAll(" $", "");
     }
 }

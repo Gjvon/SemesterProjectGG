@@ -9,7 +9,7 @@ import java.util.TreeSet;
 public class SemesterProjectGG {
     public final String TITLE = "Semester Project";
     public static void main(String[] args) throws FileNotFoundException {
-
-   Document.getDocumentFromPath("C:\\Users\\Mitnov\\Desktop\\text.txt");
+        Document s = Document.getDocumentFromPath("C:\\Users\\Mitnov\\Desktop\\text.txt");
+        System.out.print(s.getWordCount());
     }
 }

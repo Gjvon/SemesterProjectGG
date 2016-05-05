@@ -14,22 +14,37 @@ public class Document extends DocObject implements FileMetrics {
      * Initial name of document
      */
     public String FILE_NAME;
-    private int lineCount = 0;
-    private int paragraphCount = 0;
-    private int wordCount = 0;
-    private int sentenceCount = 0;
-    private Scanner scanner;
+    /**
+     * count of lines
+     */
+    private int lineCount;
+    /**
+     * count of paragraphs
+     */
+    private int paragraphCount;
+    /**
+     * count of words
+     */
+    private int wordCount;
+    /**
+     * count of sentences
+     */
+    private int sentenceCount;
 
+    //Default constructor that will not be accessed by anything other than this class
     private Document(Scanner s, String str) {
-
+        super(s instanceof Scanner ? s : null);
+        this.objectDelimiter = System.lineSeparator() + System.lineSeparator();
         FILE_NAME = str;
-        scanner = s;
 
 
     }
 
+    /**
+     * @return name of file
+     */
     public String getName() {
-        return null;
+        return FILE_NAME;
     }
 
 
@@ -39,13 +54,16 @@ public class Document extends DocObject implements FileMetrics {
 
     /**
      * Sort lines in alphabetical order
+     *
      * @return alphabetically sorted lines
      */
-    public TreeSet getSortedSentences() {
+    public TreeSet getSortedSentences() throws FileNotFoundException {
         TreeSet<String> ts = new TreeSet();
-        if (scanner != null) {
-            while (scanner.hasNext()) {
-                String line = scanner.nextLine().trim();
+        File file = new File(FILE_NAME);
+        Scanner ns = new Scanner(file);
+        if (ns != null) {
+            while (ns.hasNext()) {
+                String line = ns.nextLine().trim();
                 ts.add(line);
             }
         }
@@ -53,17 +71,30 @@ public class Document extends DocObject implements FileMetrics {
         return ts;
     }
 
+    /**
+     * Static Factory Design:
+     *
+     * @param pathName get the name of file location..
+     * @return Object instead of returning an instance of the object that the main method can access.
+     * the default constructor is not available outside this class.
+     * @throws FileNotFoundException if file was not found. Check for spelling and syntax.
+     */
     public static Document getDocumentFromPath(String pathName) throws FileNotFoundException {
         try {
             File fileIn = new File(pathName);
             Scanner s = new Scanner(fileIn);
             Document myDocument = new Document(s, pathName);
-            myDocument.parse();
-            myDocument.getSortedSentences();
-            return myDocument;
+            //String t = myDocument.toString().replaceAll("(" + System.lineSeparator() + ")+$", "");
+            //System.out.print( myDocument.getLineCount());
+            //System.out.print(t);
+            return myDocument; //return a reference to the object
         } catch (FileNotFoundException e) {
             System.out.println("No file");
         }
+        /**
+         * will never be returned. Program will halt if file does not exist. This is a holder for the compiler
+         * without it our program will not compile
+         */
         return null;
 
     }
@@ -72,17 +103,37 @@ public class Document extends DocObject implements FileMetrics {
     public boolean parse() {
         Scanner scanner = (Scanner) source;
         boolean inParagraph = false;
+        /**
+         * lines will hold the lines of strings.
+         * Each line will be put into a container via the ArrayList.
+         */
         ArrayList<String> lines = new ArrayList<String>();
-        if (scanner != null) {
+
+        if (scanner != null) { //if scanner can be read, continue. This will loop throughout the entire file.
+            //if the scanner has a neext line, run the block of code
             while (scanner.hasNext()) {
+                /**
+                 * Put each line of code into the ArrayList objects. Objects was inherited by the DocObject class.
+                 */
                 String line = scanner.nextLine().trim();
                 if (line.length() == 0) {
-                    if (inParagraph) {
+                    /**
+                     * If the program is reading inside a paragraph, run this block of code.
+                     * The program knows if we are inside a paragraph. There will be no blank lines.
+                     * Black lines: line.length == 0 (See above)
+                     */
+                    if (inParagraph) {  //in paragraph
+                        //add paragraph lines into array
                         objects.add(new Paragraph(lines.toArray(new String[lines.size()])));
                         inParagraph = false;
+                        //clear memory when we are finished. ArrayList lines is no longer needed.
                         lines.clear();
                     }
                 } else {
+                    /**
+                     * If we were not in the paragraph, add the empty line to lines and change inParagraph to true.
+                     * This is assuming that paragraphs are separated by an empty line.
+                     */
                     lines.add(line);
                     inParagraph = true;
                 }
@@ -90,6 +141,10 @@ public class Document extends DocObject implements FileMetrics {
             if (inParagraph)
                 objects.add(new Paragraph(lines.toArray(new String[lines.size()])));
             // collect FileMetrics data now
+            /**
+             * This is where we gain access to the number of objects that are actually in a file:
+             * Number of paragraphs, sentences, words, and lines.
+             */
             paragraphCount = objects.size();
             for (int i = 0; i < paragraphCount; i++) {
                 Paragraph p = (Paragraph) objects.get(i);
@@ -106,6 +161,7 @@ public class Document extends DocObject implements FileMetrics {
             }
             // lineCount needs intervening blank lines so add in now
             lineCount += paragraphCount - 1;
+
             return true;
         } else
             return false;

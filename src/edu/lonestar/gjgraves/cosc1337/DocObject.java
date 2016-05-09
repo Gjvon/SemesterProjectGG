@@ -6,13 +6,19 @@ import java.util.ArrayList;
  * Created by ${Gjvon} on 5/4/2016.
  */
 public abstract class DocObject {
+    //source is the scanner object
+    protected Object source;
+    //array of objects
+    protected ArrayList<Object> objects;
+    protected String objectDelimiter;
+    protected boolean parsed;
 
-    Object source;
-    ArrayList<Object> objects;
-    String objectDelimiter;
-    boolean parsed;
-
-    DocObject(Object source) {
+    /**
+     * Default constructor
+     *
+     * @param source is the scanner object
+     */
+    public DocObject(Object source) {
 
         this.source = source;
         this.objects = new ArrayList<Object>();
@@ -23,6 +29,9 @@ public abstract class DocObject {
     public abstract boolean parse();
 
     @Override
+    /**
+     * String method to check for parsing
+     */
     public final String toString() {
         if (!parsed)
             this.parsed = parse();
@@ -33,6 +42,7 @@ public abstract class DocObject {
             if (i < (objectCt - 1))
                 result.append(this.objectDelimiter);
         }
-        return result.toString().replaceAll(" $", "");
+        String out = result.toString().replaceAll(" $", "");
+        return out;
     }
 }

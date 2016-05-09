@@ -2,15 +2,13 @@ package edu.lonestar.gjgraves.cosc1337;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by Gjvon on 5/4/2016.
  */
 public class Sentence extends DocObject {
 
-    Sentence(Object src) {
+    public Sentence(Object src) {
         super(src instanceof String ? src : null);
         /**
          * initialize delimiter value within the constructor

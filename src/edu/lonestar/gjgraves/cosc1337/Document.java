@@ -5,11 +5,16 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Gjvon on 4/30/2016.
  */
 public class Document extends DocObject implements FileMetrics {
+
+    //End of sentence patterns
+    static final Pattern END_OF_SENTENCE_PATTERN = Pattern.compile("[\\.\\?!]\"?+\\s+|[\\.\\?!]\"?+$");
     /**
      * Initial name of document
      */
@@ -30,13 +35,17 @@ public class Document extends DocObject implements FileMetrics {
      * count of sentences
      */
     private int sentenceCount;
+    //words inside each paragraph
+    private int paragraphWords;
+    //array of lines within a file
+    private ArrayList<String> lines;
 
     //Default constructor that will not be accessed by anything other than this class
     private Document(Scanner s, String str) {
         super(s instanceof Scanner ? s : null);
         this.objectDelimiter = System.lineSeparator() + System.lineSeparator();
         FILE_NAME = str;
-
+        lines = new ArrayList<String>();
 
     }
 
@@ -48,8 +57,8 @@ public class Document extends DocObject implements FileMetrics {
     }
 
 
-    public ArrayList getLines() {
-        return null;
+    public ArrayList<String> getLines() {
+        return lines;
     }
 
     /**
@@ -59,13 +68,9 @@ public class Document extends DocObject implements FileMetrics {
      */
     public TreeSet getSortedSentences() throws FileNotFoundException {
         TreeSet<String> ts = new TreeSet();
-        File file = new File(FILE_NAME);
-        Scanner ns = new Scanner(file);
-        if (ns != null) {
-            while (ns.hasNext()) {
-                String line = ns.nextLine().trim();
-                ts.add(line);
-            }
+
+        for (String s : lines) {
+            ts.add(s);
         }
         System.out.println(ts);
         return ts;
@@ -80,24 +85,24 @@ public class Document extends DocObject implements FileMetrics {
      * @throws FileNotFoundException if file was not found. Check for spelling and syntax.
      */
     public static Document getDocumentFromPath(String pathName) throws FileNotFoundException {
-        try {
-            File fileIn = new File(pathName);
-            Scanner s = new Scanner(fileIn);
-            Document myDocument = new Document(s, pathName);
-            //String t = myDocument.toString().replaceAll("(" + System.lineSeparator() + ")+$", "");
-            //System.out.print( myDocument.getLineCount());
-            //System.out.print(t);
-            return myDocument; //return a reference to the object
-        } catch (FileNotFoundException e) {
-            System.out.println("No file");
+        File fileIn = new File(pathName);
+        Scanner s = new Scanner(fileIn);
+        Document myDocument = new Document(s, pathName);
+        //while there are still lines to read, handle empty or non-empty lines
+        while (s.hasNextLine()) {
+            //trim to rid of trailing white space
+            String nLine = s.nextLine().trim();
+            myDocument.lines.add(nLine);
+            if (nLine.length() == 0) {
+                myDocument.handleEmptyLine();
+            } else {
+                myDocument.handleNonEmptyLine(nLine);
+            }
         }
-        /**
-         * will never be returned. Program will halt if file does not exist. This is a holder for the compiler
-         * without it our program will not compile
-         */
-        return null;
 
+        return myDocument; //return a reference to the object
     }
+
 
     @Override
     public boolean parse() {
@@ -166,6 +171,37 @@ public class Document extends DocObject implements FileMetrics {
         } else
             return false;
     }
+
+    //if the line is not empty and has string objects
+    public void handleNonEmptyLine(String line) {
+        line = line.replaceAll("\\s+", " ");
+        sentenceCount += countSentences(line);
+        String[] words = line.split(" ");
+        paragraphWords += words.length;
+    }
+
+    /**
+     * Processes empty lines when found; accumulating or resetting the
+     * appropriate counters.
+     */
+    public void handleEmptyLine() {
+        if (paragraphWords > 0) {
+            wordCount += paragraphWords;
+            paragraphCount++;
+            paragraphWords = 0;
+        }
+    }
+
+    //count the number of sentences on each line.
+    private int countSentences(String line) {
+        int sentences = 0;
+        Matcher m = END_OF_SENTENCE_PATTERN.matcher(line);
+        while (m.find())
+            sentences++;
+        return sentences;
+    }
+
+
     //Accessor methods
 
     /**
@@ -173,7 +209,7 @@ public class Document extends DocObject implements FileMetrics {
      */
     @Override
     public int getLineCount() {
-        return lineCount;
+        return lines.size();
     }
 
     /**

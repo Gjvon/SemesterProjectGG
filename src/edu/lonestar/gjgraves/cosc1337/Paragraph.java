@@ -1,7 +1,5 @@
 package edu.lonestar.gjgraves.cosc1337;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,12 +12,17 @@ class Paragraph extends DocObject {
      */
     private Pattern SENTENCE_ENDER = Pattern.compile("[\\.\\?!]\"?+\\s+|[\\.\\?!]\"?+$");
 
-    Paragraph(Object src) {
+    public Paragraph(Object src) {
 
         super(src instanceof String[] ? src : null);
         this.objectDelimiter = System.lineSeparator();
     }
 
+    /**
+     * This method is for parsing objects of object Paragraph
+     *
+     * @return true if source is not null
+     */
     @Override
     public boolean parse() {
         if (source != null) {
@@ -43,8 +46,6 @@ class Paragraph extends DocObject {
         } else
             return false;
     }
-
-
 
 
 }
